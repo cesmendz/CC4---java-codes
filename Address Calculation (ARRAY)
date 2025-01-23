@@ -1,0 +1,53 @@
+ import java.util.Scanner;
+
+public class Array {
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+
+        // Input: Number of Dimensions
+        System.out.print("Enter the number of dimensions: ");
+        int dimensions = scanner.nextInt();
+
+        // Input: Base or Alpha
+        System.out.print("Enter the base address (Alpha): ");
+        int baseAddress = scanner.nextInt();
+
+        // Input: Element Size
+        System.out.print("Enter the size of each element (in bytes): ");
+        int elementSize = scanner.nextInt();
+
+        // Input: Upper Bounds
+        int[] upperBounds = new int[dimensions];
+        System.out.println("Enter the upper bounds for each dimension:");
+        for (int i = 0; i < dimensions; i++) {
+            System.out.print("Upper bound for dimension " + (i + 1) + ": ");
+            upperBounds[i] = scanner.nextInt();
+        }
+
+        // Input: Target Element
+        int[] targetElement = new int[dimensions];
+        System.out.println("Enter the target element indices for each dimension:");
+        for (int i = 0; i < dimensions; i++) {
+            System.out.print("Index for dimension " + (i + 1) + ": ");
+            targetElement[i] = scanner.nextInt();
+        }
+
+        // Calculate Strides
+        int[] strides = new int[dimensions];
+        strides[dimensions - 1] = 1; // Last dimension stride is 1
+        for (int i = dimensions - 2; i >= 0; i--) {
+            strides[i] = strides[i + 1] * (upperBounds[i + 1] + 1);
+        }
+
+        // Calculate the address of the target element
+        int address = baseAddress;
+        for (int i = 0; i < dimensions; i++) {
+            address += targetElement[i] * strides[i] * elementSize;
+        }
+
+        // Output the result
+        System.out.println("The address of the target element is: " + address);
+        
+        scanner.close();
+    }
+}
