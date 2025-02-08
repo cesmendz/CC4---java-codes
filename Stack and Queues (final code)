@@ -1,17 +1,18 @@
 import java.util.Scanner;
 
-class SimpleStack {
-    private int[] stack;
+class SimpleStack<T> {
+    private T[] stack;
     private int top;
     private int maxSize;
 
+    @SuppressWarnings("unchecked")
     public SimpleStack(int size) {
         maxSize = size;
-        stack = new int[maxSize];
+        stack = (T[]) new Object[maxSize]; // Use generics for type safety
         top = -1;
     }
 
-    public void push(int value) {
+    public void push(T value) {
         if (top < maxSize - 1) {
             stack[++top] = value;
             System.out.println("Pushed: " + value);
@@ -20,7 +21,7 @@ class SimpleStack {
         }
     }
 
-    public Integer pop() {
+    public T pop() {
         if (top >= 0) {
             return stack[top--];
         } else {
@@ -38,40 +39,44 @@ class SimpleStack {
     }
 }
 
-class SimpleQueue {
-    private int[] queue;
+class SimpleCircularQueue<T> {
+    private T[] queue;
     private int front;
     private int rear;
     private int maxSize;
 
-    public SimpleQueue(int size) {
-        maxSize = size;
-        queue = new int[maxSize];
+    @SuppressWarnings("unchecked")
+    public SimpleCircularQueue(int size) {
+        maxSize = size + 1; // Increase size by 1 to differentiate full and empty
+        queue = (T[]) new Object[maxSize]; // Use generics for type safety
         front = 0;
-        rear = -1;
+        rear = 0;
     }
 
-    public void enqueue(int value) {
-        if (rear < maxSize - 1) {
-            queue[++rear] = value;
-            System.out.println("Enqueued: " + value);
-        } else {
+    public void enqueue(T value) {
+        if ((rear + 1) % maxSize == front) {
             System.out.println("Queue is full.");
+        } else {
+            queue[rear] = value;
+            rear = (rear + 1) % maxSize;
+            System.out.println("Enqueued: " + value);
         }
     }
 
-    public Integer dequeue() {
-        if (front <= rear) {
-            return queue[front++];
-        } else {
+    public T dequeue() {
+        if (front == rear) {
             System.out.println("Queue is empty.");
             return null;
+        } else {
+            T value = queue[front];
+            front = (front + 1) % maxSize;
+            return value;
         }
     }
 
     public void print() {
         System.out.print("Queue contents: ");
-        for (int i = front; i <= rear; i++) {
+        for (int i = front; i != rear; i = (i + 1) % maxSize) {
             System.out.print(queue[i] + " ");
         }
         System.out.println();
@@ -81,31 +86,28 @@ class SimpleQueue {
 public class StackQueueDemo {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
-        
+
         System.out.print("Choose 1 for 'stack' or 2 for 'queue': ");
         int choice = scanner.nextInt();
-        
+        scanner.nextLine(); // Consume newline
+
         System.out.print("Enter the size of the data structure: ");
         int n = scanner.nextInt();
         scanner.nextLine(); // Consume newline
 
         if (choice == 1) { // Stack
-            SimpleStack stack = new SimpleStack(n);
+            SimpleStack<String> stack = new SimpleStack<>(n);
             while (true) {
-                System.out.print("Enter 1 for 'push' followed by integers (space-separated) or 2 for 'pop' (or 'end' to finish): ");
+                System.out.print("Enter 1 for 'push' followed by values (space-separated) or 2 for 'pop' (or 'end' to finish): ");
                 String operation = scanner.nextLine().toLowerCase();
-                
+
                 if (operation.startsWith("1")) { // Push
                     String[] values = operation.substring(2).trim().split(" ");
                     for (String value : values) {
-                        try {
-                            stack.push(Integer.parseInt(value));
-                        } catch (NumberFormatException e) {
-                            System.out.println("Invalid integer: " + value);
-                        }
+                        stack.push(value); // Push any type of value
                     }
                 } else if (operation.equals("2")) { // Pop
-                    Integer poppedValue = stack.pop();
+                    String poppedValue = stack.pop();
                     if (poppedValue != null) {
                         System.out.println("Popped: " + poppedValue);
                     }
@@ -117,28 +119,24 @@ public class StackQueueDemo {
             }
             stack.print();
         } else if (choice == 2) { // Queue
-            SimpleQueue queue = new SimpleQueue(n);
+            SimpleCircularQueue<String> queue = new SimpleCircularQueue<>(n);
             while (true) {
-                System.out.print("Enter 1 for 'enqueue' followed by integers (space-separated) or 2 for 'dequeue' (or 'end' to finish): ");
+                System.out.print("Enter 1 for 'enqueue' followed by values (space-separated) or 2 for 'dequeue' (or 'end' to finish): ");
                 String operation = scanner.nextLine().toLowerCase();
-                
+
                 if (operation.startsWith("1")) { // Enqueue
                     String[] values = operation.substring(2).trim().split(" ");
                     for (String value : values) {
-                        try {
-                            queue.enqueue(Integer.parseInt(value));
-                        } catch (NumberFormatException e) {
-                            System.out.println("Invalid integer: " + value);
-                        }
+                        queue.enqueue(value); // Enqueue any type of value
                     }
                 } else if (operation.equals("2")) { // Dequeue
-                    Integer dequeuedValue = queue.dequeue();
+                    String dequeuedValue = queue.dequeue();
                     if (dequeuedValue != null) {
                         System.out.println("Dequeued: " + dequeuedValue);
                     }
                 } else if (operation.equals("end")) {
                     break;
- } else {
+                } else {
                     System.out.println("Invalid operation.");
                 }
             }
@@ -146,7 +144,7 @@ public class StackQueueDemo {
         } else {
             System.out.println("Invalid choice.");
         }
-        
+
         scanner.close();
     }
 }
