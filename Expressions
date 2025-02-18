@@ -5,7 +5,7 @@ public class Main {
 
     // Method to check if the character is an operator
     private static boolean isOperator(char c) {
-        return c == '+' || c == '-' || c == '*' || c == '/' || c == '^';
+        return c == '+' || c == '-' || c == '*' || c == '/' || c == '%'; 
     }
 
     // Method to get the precedence of operators
@@ -16,9 +16,8 @@ public class Main {
                 return 1;
             case '*':
             case '/':
-                return 2;
-            case '^':
-                return 3;
+            case '%':
+                return 2; // Adjusted precedence for modulo
             default:
                 return 0;
         }
@@ -30,6 +29,9 @@ public class Main {
         Stack<Character> stack = new Stack<>();
 
         for (char c : infix.toCharArray()) {
+            if (Character.isWhitespace(c)) {
+                continue; // Ignore whitespace
+            }
             if (Character.isLetterOrDigit(c)) {
                 postfix.append(c);
             } else if (c == '(') {
@@ -38,17 +40,27 @@ public class Main {
                 while (!stack.isEmpty() && stack.peek() != '(') {
                     postfix.append(stack.pop());
                 }
-                stack.pop(); // Remove '(' from stack
+                if (!stack.isEmpty()) {
+                    stack.pop(); // Remove '(' from stack
+                } else {
+                    throw new IllegalArgumentException("Mismatched parentheses");
+                }
             } else if (isOperator(c)) {
                 while (!stack.isEmpty() && precedence(stack.peek()) >= precedence(c)) {
                     postfix.append(stack.pop());
                 }
                 stack.push(c);
+            } else {
+                throw new IllegalArgumentException("Invalid character: " + c);
             }
         }
 
         while (!stack.isEmpty()) {
-            postfix.append(stack.pop());
+            char top = stack.pop();
+            if (top == '(') {
+                throw new IllegalArgumentException("Mismatched parentheses");
+            }
+            postfix.append(top);
         }
 
         return postfix.toString();
@@ -83,10 +95,14 @@ public class Main {
         System.out.print("Enter infix: ");
         String infix = scanner.nextLine();
 
-        String postfix = infixToPostfix(infix);
-        String prefix = infixToPrefix(infix);
+        try {
+            String postfix = infixToPostfix(infix);
+            String prefix = infixToPrefix(infix);
 
-        System.out.println("Prefix is: " + prefix);
-        System.out.println("Postfix is: " + postfix);
+            System.out.println("Prefix is: " + prefix);
+            System.out.println("Postfix is: " + postfix);
+        } catch (IllegalArgumentException e) {
+            System.out.println("Error: " + e.getMessage());
+        }
     }
 }
