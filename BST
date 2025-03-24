@@ -1,0 +1,155 @@
+import java.util.*;
+
+// BST Node class
+public class Node {
+    int value;
+    Node left, right;
+
+    public Node(int value) {
+        this.value = value;
+        left = right = null;
+    }
+
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        BST tree = new BST();
+        boolean running = true;
+
+        while (running) {
+            System.out.println("\nSelect an option:");
+            System.out.println("1. Insert numbers");
+            System.out.println("2. Delete numbers");
+            System.out.println("3. Display 1D Array Representation");
+            System.out.println("4. Exit");
+            System.out.print("Enter your choice (1-4): ");
+
+            int choice = getValidInteger(scanner);
+
+            switch (choice) {
+                case 1:
+                    System.out.print("Enter numbers to insert (space-separated): ");
+                    String[] insertValues = scanner.nextLine().trim().split(" ");
+                    for (String num : insertValues) {
+                        if (!num.isEmpty()) {
+                            tree.insert(Integer.parseInt(num));
+                        }
+                    }
+                    System.out.println("Numbers inserted successfully.");
+                    break;
+                case 2:
+                    System.out.print("Enter numbers to delete (space-separated): ");
+                    String[] deleteValues = scanner.nextLine().trim().split(" ");
+                    for (String num : deleteValues) {
+                        if (!num.isEmpty()) {
+                            tree.driftDelete(Integer.parseInt(num));
+                        }
+                    }
+                    System.out.println("Numbers deleted successfully.");
+                    break;
+                case 3:
+                    System.out.println("\n1D Array Representation: " + tree.to1DArray());
+                    break;
+                case 4:
+                    running = false;
+                    System.out.println("Exiting the program. Goodbye!");
+                    break;
+                default:
+                    System.out.println("Invalid choice. Please select a valid option (1-4).");
+            }
+        }
+        scanner.close();
+    }
+
+    private static int getValidInteger(Scanner scanner) {
+        while (true) {
+            try {
+                return Integer.parseInt(scanner.nextLine());
+            } catch (NumberFormatException e) {
+                System.out.print("Invalid input. Please enter a valid integer: ");
+            }
+        }
+    }
+}
+
+// BST Tree class
+class BST {
+    Node root;
+
+    // Insert method
+    public void insert(int value) {
+        root = insertRec(root, value);
+    }
+
+    private Node insertRec(Node root, int value) {
+        if (root == null) {
+            return new Node(value);
+        }
+        if (value < root.value) {
+            root.left = insertRec(root.left, value);
+        } else if (value > root.value) {
+            root.right = insertRec(root.right, value);
+        }
+        return root;
+    }
+
+    // Drift Delete method (shifts nodes instead of direct removal)
+    public void driftDelete(int value) {
+        root = driftDeleteRec(root, value);
+    }
+
+    private Node driftDeleteRec(Node root, int value) {
+        if (root == null) {
+            return null;
+        }
+        if (value < root.value) {
+            root.left = driftDeleteRec(root.left, value);
+        } else if (value > root.value) {
+            root.right = driftDeleteRec(root.right, value);
+        } else {
+            if (root.left == null && root.right == null) {
+                return null;
+            } else if (root.left != null) {
+                root.value = maxValue(root.left);
+                root.left = driftDeleteRec(root.left, root.value);
+            } else {
+                root.value = minValue(root.right);
+                root.right = driftDeleteRec(root.right, root.value);
+            }
+        }
+        return root;
+    }
+
+    private int minValue(Node root) {
+        while (root.left != null) {
+            root = root.left;
+        }
+        return root.value;
+    }
+
+    private int maxValue(Node root) {
+        while (root.right != null) {
+            root = root.right;
+        }
+        return root.value;
+    }
+
+    // Convert BST to a 1D array representation (full binary tree format)
+    public List<Integer> to1DArray() {
+        int height = getHeight(root);
+        int size = (int) Math.pow(2, height) - 1;
+        Integer[] arr = new Integer[size];
+        Arrays.fill(arr, 0);
+        fillArray(root, arr, 0);
+        return Arrays.asList(arr);
+    }
+
+    private void fillArray(Node root, Integer[] arr, int index) {
+        if (root == null || index >= arr.length) {
+            return;
+        }
+        arr[index] = root.value;
+        fillArray(root.left, arr, 2 * index + 1);
+        fillArray(root.right, arr, 2 * index + 2);
+    }
+
+    private int getHeight(Node root)
