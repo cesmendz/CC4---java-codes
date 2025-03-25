@@ -152,4 +152,8 @@ class BST {
         fillArray(root.right, arr, 2 * index + 2);
     }
 
-    private int getHeight(Node root)
+    private int getHeight(Node root) {
+        if (root == null) return 0;
+        return 1 + Math.max(getHeight(root.left), getHeight(root.right));
+    }
+}
