@@ -1,10 +1,10 @@
 import java.util.Scanner;
 
 class Node {
-    int data;
+    String data; 
     Node left, right;
 
-    public Node(int item) {
+    public Node(String item) {
         data = item;
         left = right = null;
     }
@@ -13,7 +13,7 @@ class Node {
 class BinaryTree {
     Node root;
 
-    // Pre-order traversal (Root, Left, Right)
+    // Pre-order traversal
     void preOrder(Node node) {
         if (node == null) {
             return;
@@ -23,7 +23,7 @@ class BinaryTree {
         preOrder(node.right);
     }
 
-    // In-order traversal (Left, Root, Right)
+    // In-order traversal
     void inOrder(Node node) {
         if (node == null) {
             return;
@@ -33,7 +33,7 @@ class BinaryTree {
         inOrder(node.right);
     }
 
-    // Post-order traversal (Left, Right, Root)
+    // Post-order traversal
     void postOrder(Node node) {
         if (node == null) {
             return;
@@ -43,61 +43,44 @@ class BinaryTree {
         System.out.print(node.data + " ");
     }
 
-    // Wrapper methods to call traversals from the root
-    void preOrder() {
-        preOrder(root);
-    }
-
-    void inOrder() {
-        inOrder(root);
-    }
-
-    void postOrder() {
-        postOrder(root);
-    }
-
-    // Method to insert nodes in the binary tree
-    Node insertLevelOrder(int[] arr, Node root, int i) {
-        // Base case for recursion
-        if (i < arr.length) {
-            Node temp = new Node(arr[i]);
-            root = temp;
-
-            // Insert left child
-            root.left = insertLevelOrder(arr, root.left, 2 * i + 1);
-            // Insert right child
-            root.right = insertLevelOrder(arr, root.right, 2 * i + 2);
+    // Method to insert a new node in the binary tree
+    Node insert(Node node, String data) {
+        if (node == null) {
+            return new Node(data);
         }
-        return root;
+        // Compare strings lexicographically
+        if (data.compareTo(node.data) < 0) {
+            node.left = insert(node.left, data);
+        } else if (data.compareTo(node.data) > 0) {
+            node.right = insert(node.right, data);
+        }
+        return node;
     }
+}
 
+public class Main {
     public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
         BinaryTree tree = new BinaryTree();
+        Scanner scanner = new Scanner(System.in);
 
-        System.out.print("Enter the number of nodes in the binary tree: ");
+        System.out.println("Enter the number of NODES you want to insert:");
         int n = scanner.nextInt();
-        int[] arr = new int[n];
+        scanner.nextLine(); // Consume the newline character
 
-        System.out.println("Enter the values of the nodes:");
+        System.out.println("Enter the values of the nodes (NUMBERS or LETTERS):");
         for (int i = 0; i < n; i++) {
-            arr[i] = scanner.nextInt();
+            String value = scanner.nextLine(); // Read a string input
+            tree.root = tree.insert(tree.root, value);
         }
 
-        // Build the binary tree from the array
-        tree.root = tree.insertLevelOrder(arr, tree.root, 0);
-
-        System.out.println("Pre-order traversal:");
-        tree.preOrder(); // Output: Pre-order traversal
-        System.out.println();
-
-        System.out.println("In-order traversal:");
-        tree.inOrder(); // Output: In-order traversal
-        System.out.println();
-
-        System.out.println("Post-order traversal:");
-        tree.postOrder(); // Output: Post-order traversal
-        System.out.println();
+        System.out.println("\nPre-order traversal:");
+        tree.preOrder(tree.root);
+        
+        System.out.println("\nIn-order traversal:");
+        tree.inOrder(tree.root);
+        
+        System.out.println("\nPost-order traversal:");
+        tree.postOrder(tree.root);
 
         scanner.close();
     }
