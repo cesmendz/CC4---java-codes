@@ -1,87 +1,205 @@
+import java.util.InputMismatchException;
+import java.util.LinkedList;
+import java.util.Queue;
 import java.util.Scanner;
 
+// Converts a string to an integer array
+class stringToArray {
+    public int[] stringToArr(String s) {
+        String[] s1 = s.replaceAll("\\[", "").replaceAll("]", "").split(",");
+        int[] arr = new int[s1.length];
+
+        for (int i = 0; i < s1.length; i++) {
+            arr[i] = Integer.parseInt(s1[i].trim());
+        }
+        return arr;
+    }
+}
+
+// Node Class
 class Node {
-    String data; 
+    int key;
     Node left, right;
 
-    public Node(String item) {
-        data = item;
+    public Node(int item) {
+        key = item;
         left = right = null;
     }
 }
 
+// BinaryTree Class
 class BinaryTree {
     Node root;
 
-    // Pre-order traversal
-    void preOrder(Node node) {
-        if (node == null) {
-            return;
-        }
-        System.out.print(node.data + " ");
-        preOrder(node.left);
-        preOrder(node.right);
+    public BinaryTree() {
+        root = null;
     }
 
-    // In-order traversal
-    void inOrder(Node node) {
-        if (node == null) {
-            return;
-        }
-        inOrder(node.left);
-        System.out.print(node.data + " ");
-        inOrder(node.right);
+    // Insert method for BST
+    public void insert(int key) {
+        root = insertRec(root, key);
     }
 
-    // Post-order traversal
-    void postOrder(Node node) {
-        if (node == null) {
-            return;
+    private Node insertRec(Node root, int key) {
+        if (root == null) {
+            return new Node(key);
         }
-        postOrder(node.left);
-        postOrder(node.right);
-        System.out.print(node.data + " ");
+        if (key < root.key) {
+            root.left = insertRec(root.left, key);
+        } else if (key > root.key) {
+            root.right = insertRec(root.right, key);
+        }
+        return root;
     }
 
-    // Method to insert a new node in the binary tree
-    Node insert(Node node, String data) {
-        if (node == null) {
-            return new Node(data);
+    // Inorder Traversal (L, Root, R)
+    public void inorder(Node node) {
+        if (node != null) {
+            inorder(node.left);
+            System.out.print(node.key + " ");
+            inorder(node.right);
         }
-        // Compare strings lexicographically
-        if (data.compareTo(node.data) < 0) {
-            node.left = insert(node.left, data);
-        } else if (data.compareTo(node.data) > 0) {
-            node.right = insert(node.right, data);
+    }
+
+    // Preorder Traversal (Root, L, R)
+    public void preorder(Node node) {
+        if (node != null) {
+            System.out.print(node.key + " ");
+            preorder(node.left);
+            preorder(node.right);
         }
-        return node;
+    }
+
+    // Postorder Traversal (L, R, Root)
+    public void postorder(Node node) {
+        if (node != null) {
+            postorder(node.left);
+            postorder(node.right);
+            System.out.print(node.key + " ");
+        }
+    }
+
+    // Level Order Traversal (BFS) - For reference
+    public void levelOrder() {
+        if (root == null) {
+            System.out.println("null");
+            return;
+        }
+
+        Queue<Node> queue = new LinkedList<>();
+        queue.add(root);
+
+        while (!queue.isEmpty()) {
+            Node tempNode = queue.poll();
+            System.out.print(tempNode.key + " ");
+
+            if (tempNode.left != null) queue.add(tempNode.left);
+            if (tempNode.right != null) queue.add(tempNode.right);
+        }
+    }
+
+    // Custom delete method with specific traversal technique
+    public void delete(int key) {
+        root = customDelete(root, key);
+    }
+
+    private Node customDelete(Node root, int key) {
+        if (root == null) {
+            return null;
+        }
+
+        if (key < root.key) {
+            root.left = customDelete(root.left, key);
+        } else if (key > root.key) {
+            root.right = customDelete(root.right, key);
+        } else {
+            // Case 1: No children
+            if (root.left == null && root.right == null) {
+                return null;
+            }
+            // Case 2: One child
+            else if (root.left == null) {
+                return root.right;
+            } else if (root.right == null) {
+                return root.left;
+            }
+            // Case 3: Two children
+            else {
+                int replacement = findRightmost(root.left);
+                root.key = replacement;
+                root.left = customDelete(root.left, replacement);
+            }
+        }
+        return root;
+    }
+
+    private int findRightmost(Node node) {
+        while (node.right != null) {
+            node = node.right;
+        }
+        return node.key;
     }
 }
 
+// Main Class
 public class Main {
     public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
         BinaryTree tree = new BinaryTree();
-        Scanner scanner = new Scanner(System.in);
+        stringToArray convert = new stringToArray();
 
-        System.out.println("Enter the number of NODES you want to insert:");
-        int n = scanner.nextInt();
-        scanner.nextLine(); // Consume the newline character
+        while (true) {
+            try {
+                System.out.print("\nOptions" +
+                                "\n1. Insert" +
+                                "\n2. Delete" +
+                                "\n Enter your Choice: ");
+                int inp = sc.nextInt();
+                sc.nextLine();
 
-        System.out.println("Enter the values of the nodes (NUMBERS or LETTERS):");
-        for (int i = 0; i < n; i++) {
-            String value = scanner.nextLine(); // Read a string input
-            tree.root = tree.insert(tree.root, value);
+                if (inp == 1) {
+                    System.out.print("\nInsert (e.g., [5,3,7,2,4,6,8]): ");
+                    String numbers = sc.nextLine();
+                    int[] arr = convert.stringToArr(numbers);
+
+                    for (int num : arr) {
+                        tree.insert(num);
+                    }
+
+                    System.out.println("\nTraversals:");
+                    System.out.print("Inorder:   ");
+                    tree.inorder(tree.root);
+                    System.out.print("\nPreorder:  ");
+                    tree.preorder(tree.root);
+                    System.out.print("\nPostorder: ");
+                    tree.postorder(tree.root);
+                    System.out.println();
+
+                } else if (inp == 2) {
+                    System.out.print("\nDelete: ");
+                    String delete = sc.nextLine();
+                    int[] arr1 = convert.stringToArr(delete);
+
+                    for (int num : arr1) {
+                        tree.delete(num);
+                    }
+
+                    System.out.println("\nTraversals after deletion:");
+                    System.out.print("Inorder:   ");
+                    tree.inorder(tree.root);
+                    System.out.print("\nPreorder:  ");
+                    tree.preorder(tree.root);
+                    System.out.print("\nPostorder: ");
+                    tree.postorder(tree.root);
+                    System.out.println();
+
+                } else {
+                    System.out.println("Invalid Input");
+                }
+            } catch (InputMismatchException e) {
+                System.out.println("Invalid Input! Please enter a valid choice.");
+                sc.nextLine(); // Clear invalid input
+            }
         }
-
-        System.out.println("\nPre-order traversal:");
-        tree.preOrder(tree.root);
-        
-        System.out.println("\nIn-order traversal:");
-        tree.inOrder(tree.root);
-        
-        System.out.println("\nPost-order traversal:");
-        tree.postOrder(tree.root);
-
-        scanner.close();
     }
 }
